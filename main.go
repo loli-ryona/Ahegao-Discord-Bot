@@ -22,7 +22,7 @@ type statusbarServer struct {
 	id   string
 }
 
-var statusbarServers = []statusbarServer {
+var statusbarServers = []statusbarServer{
 	{"🍺 Pub: ", "144.48.37.114:27015", "883671130286739476"},
 	{"🤍 WL: ", "144.48.37.118:27015", "883671190521147412"},
 	{"🦘 Kanga: ", "146.185.214.33:27015", "883671212784488498"},
@@ -47,9 +47,10 @@ var (
 
 func onError(ctx ap.Context, cmd *ap.Command, context []string, err error) {
 	if err == ap.ErrCommandNotFound {
-		fmt.Printf("An error occurred for command \"%s\": \"%s\".\n", cmd.Name, err.Error())
 		return
 	}
+
+	fmt.Printf("An error occurred for command \"%s\": \"%s\".\n", cmd.Name, err.Error())
 }
 
 func cmdPrerun(ctx ap.Context, cmd *ap.Command, content []string) bool {
@@ -85,10 +86,10 @@ func main() {
 	handler.AddCommand("ping", "Check the bot's ping.", []string{"pong"}, false, false, discordgo.PermissionSendMessages, discordgo.PermissionSendMessages, ap.CommandTypeEverywhere, pingCommand)
 	handler.AddCommand("players", "Lists players on Bhop Servers", []string{}, false, false, discordgo.PermissionSendMessages, discordgo.PermissionSendMessages, ap.CommandTypeEverywhere, cmds.PlayersCommand)
 	handler.AddCommand("about", "Shows bot information", []string{}, false, false, discordgo.PermissionSendMessages, discordgo.PermissionSendMessages, ap.CommandTypeEverywhere, cmds.AboutCommand)
+	handler.AddCommand("urban", "Search a word on urban dictionairy", []string{"ud"}, false, false, discordgo.PermissionSendMessages, discordgo.PermissionSendMessages, ap.CommandTypeEverywhere, cmds.UrbanCommand)
 
 	//Help command
 	handler.SetHelpCommand("help", []string{}, discordgo.PermissionSendMessages, discordgo.PermissionSendMessages, cmds.HelpCommand)
-
 
 	//Needed for status bar updates to work
 	discord.AddHandler(ready)

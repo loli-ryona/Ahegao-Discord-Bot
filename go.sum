@@ -1,3 +1,5 @@
+github.com/JoshuaDoes/urbandictionary v0.0.0-20180802142829-e5f649d88711 h1:zcYBm8fLKfHL95uAmncHSUZieyRzvEu81dFpQ8RVmZ4=
+github.com/JoshuaDoes/urbandictionary v0.0.0-20180802142829-e5f649d88711/go.mod h1:ECbRPPxqlKW+wj4Yzop0OFyMePIfRPLE2MnLMrSLxbY=
 github.com/MikeModder/anpan v0.0.0-20210519171512-aa8d809ab6ac h1:c6f4YN6OV3w67xYMp20G25nEl7Vy97UyZpFlywmX1Tw=
 github.com/MikeModder/anpan v0.0.0-20210519171512-aa8d809ab6ac/go.mod h1:T8EW/NZGnIcnK5hGkjl7MAVN1zr8xeO9pbyR3kjidv4=
 github.com/bwmarrin/discordgo v0.23.2 h1:BzrtTktixGHIu9Tt7dEE6diysEF9HWnXeHuoJEt2fH4=
