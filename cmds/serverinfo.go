@@ -1,12 +1,10 @@
 package cmds
 
 import (
-	js "encoding/json"
 	"fmt"
 	ap "github.com/MikeModder/anpan"
 	dG "github.com/bwmarrin/discordgo"
 	"github.com/rumblefrog/go-a2s"
-	"os"
 	"strconv"
 	"time"
 )
@@ -15,35 +13,23 @@ func ServerInfoCommand(ctx ap.Context, args []string) error {
 	// thetime
 	ts := time.Now()
 
+	//Reply with embed
+	embed := &dG.MessageEmbed{
+		Title:       "Server info.",
+		Description: "Please wait while we query the server.",
+		Footer: &dG.MessageEmbedFooter{
+			Text:    "Calculating time to query server.",
+			IconURL: ctx.Session.State.User.AvatarURL("512"),
+		},
+	}
+
+	msg, err := ctx.ReplyEmbed(embed)
+	if err != nil {
+		return err
+	}
+
 	//Check server was supplied
 	if len(args) >= 1 {
-		//Reply with embed
-		embed := &dG.MessageEmbed{
-			Title:       "Server info.",
-			Description: "Please wait while we query the server.",
-			Footer: &dG.MessageEmbedFooter{
-				Text:    "Calculating time to query server.",
-				IconURL: ctx.Session.State.User.AvatarURL("512"),
-			},
-		}
-
-		msg, err := ctx.ReplyEmbed(embed)
-		if err != nil {
-			return err
-		}
-
-		//Load servers.json
-		servers, err := os.Open("servers.json")
-		if err != nil {
-			fmt.Println("Error loading servers. Error: ", err)
-			os.Exit(1)
-		}
-
-		if err = js.NewDecoder(servers).Decode(&srv); err != nil {
-			fmt.Println("Error decoding servers. Error: ", err)
-			os.Exit(1)
-		}
-
 		//Get server from command
 		server := args[0]
 		var sName []string
@@ -58,10 +44,30 @@ func ServerInfoCommand(ctx ap.Context, args []string) error {
 
 		if client, err := a2s.NewClient(server); err != nil {
 			fmt.Println("Error creating new A2S client. Error: ", err)
+			embedErr := &dG.MessageEmbed{
+				Title:       "Server info.",
+				Description: fmt.Sprintln("Error creating new A2S client. Error: ", err),
+				Footer: &dG.MessageEmbedFooter{
+					Text:    fmt.Sprintf("Took %.2fs to query server!", time.Since(ts).Seconds()),
+					IconURL: ctx.Session.State.User.AvatarURL("512"),
+				},
+			}
+			_, err = ctx.Session.ChannelMessageEditEmbed(ctx.Message.ChannelID, msg.ID, embedErr)
+			return nil
 		} else {
 			defer client.Close()
 			if info, err := client.QueryInfo(); err != nil {
 				fmt.Println("Error querying server. Error: ", err)
+				embedErr := &dG.MessageEmbed{
+					Title:       "Server info.",
+					Description: fmt.Sprintln("Error querying server. Error: ", err),
+					Footer: &dG.MessageEmbedFooter{
+						Text:    fmt.Sprintf("Took %.2fs to query server!", time.Since(ts).Seconds()),
+						IconURL: ctx.Session.State.User.AvatarURL("512"),
+					},
+				}
+				_, err = ctx.Session.ChannelMessageEditEmbed(ctx.Message.ChannelID, msg.ID, embedErr)
+				return nil
 			} else {
 				sName := append(sName, info.Name)
 				sMap := append(sMap, info.Map)
@@ -89,7 +95,7 @@ func ServerInfoCommand(ctx ap.Context, args []string) error {
 					Title:       sName[0],
 					Description: "Currently " + strconv.Itoa(int(sPlayers[0])) + "/" + strconv.Itoa(int(sMaxPlayers[0])) + " online.",
 					Footer: &dG.MessageEmbedFooter{
-						Text:    fmt.Sprintf("Took %.2fs to query servers!", time.Since(ts).Seconds()),
+						Text:    fmt.Sprintf("Took %.2fs to query server!", time.Since(ts).Seconds()),
 						IconURL: ctx.Session.State.User.AvatarURL("512"),
 					},
 				}
@@ -114,6 +120,17 @@ func ServerInfoCommand(ctx ap.Context, args []string) error {
 				return nil
 			}
 		}
+	} else {
+		fmt.Println("No server provided")
+		noSrv := &dG.MessageEmbed{
+			Title:       "Server info.",
+			Description: fmt.Sprintln("No server provided. Usage `_serverinfo <url.com/ip/ip:port>`"),
+			Footer: &dG.MessageEmbedFooter{
+				Text:    fmt.Sprintf("Took %.2fs to query server!", time.Since(ts).Seconds()),
+				IconURL: ctx.Session.State.User.AvatarURL("512"),
+			},
+		}
+		_, err = ctx.Session.ChannelMessageEditEmbed(ctx.Message.ChannelID, msg.ID, noSrv)
+		return nil
 	}
-	return nil
 }
