@@ -86,6 +86,8 @@ func main() {
 	h.AddCommand("players", "Lists players on Bhop Servers", []string{}, false, false, dG.PermissionSendMessages, dG.PermissionSendMessages, ap.CommandTypeEverywhere, cmds.PlayersCommand)
 	h.AddCommand("about", "Shows bot information", []string{}, false, false, dG.PermissionSendMessages, dG.PermissionSendMessages, ap.CommandTypeEverywhere, cmds.AboutCommand)
 	h.AddCommand("urban", "Search a word on urban dictionary", []string{"ud"}, false, false, dG.PermissionSendMessages, dG.PermissionSendMessages, ap.CommandTypeEverywhere, cmds.UrbanCommand)
+	h.AddCommand("currentmap", "List current maps on Bhop Servers", []string{"cm"}, false, false, dG.PermissionSendMessages, dG.PermissionSendMessages, ap.CommandTypeEverywhere, cmds.CurrentMapCommand)
+	h.AddCommand("serverinfo", "Shows information of a server. _serverinfo 127.0.0.1:27015", []string{"si"}, false, false, dG.PermissionSendMessages, dG.PermissionSendMessages, ap.CommandTypeEverywhere, cmds.ServerInfoCommand)
 
 	//Help command
 	h.SetHelpCommand("help", []string{}, dG.PermissionSendMessages, dG.PermissionSendMessages, cmds.HelpCommand)

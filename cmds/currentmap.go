@@ -1,6 +1,7 @@
 package cmds
 
 import (
+	fwk "Ahegao_Discord_Bot/framework"
 	js "encoding/json"
 	"fmt"
 	ap "github.com/MikeModder/anpan"
@@ -11,7 +12,11 @@ import (
 	"time"
 )
 
-func PlayersCommand(ctx ap.Context, _ []string) error {
+var (
+	srv fwk.Servers
+)
+
+func CurrentMapCommand(ctx ap.Context, _ []string) error {
 	// thetime
 	ts := time.Now()
 
@@ -20,8 +25,8 @@ func PlayersCommand(ctx ap.Context, _ []string) error {
 
 	//Reply with embed
 	embed := &dG.MessageEmbed{
-		Title:       "Current players online.",
-		Description: "Please wait while we query the servers for players",
+		Title:       "Current maps.",
+		Description: "Please wait while we query the servers for maps",
 		Footer: &dG.MessageEmbedFooter{
 			Text:    "Calculating time to query servers.",
 			IconURL: ctx.Session.State.User.AvatarURL("512"),
@@ -45,35 +50,27 @@ func PlayersCommand(ctx ap.Context, _ []string) error {
 		os.Exit(1)
 	}
 
-	//Loop through each server and get players
+	//Loop through each server and get current map
 	for i := 0; i < len(srv.Name); i++ {
-		var realPlayers []string
+		var cm []string
 		if client, err := a2s.NewClient(srv.Addr[i]); err != nil {
 			fmt.Println("Error creating new A2S client. Error: ", err)
 		} else {
 			defer client.Close()
-			if players, err := client.QueryPlayer(); err != nil {
-				fmt.Println("Error querying players. Error: ", err)
+			if maaps, err := client.QueryInfo(); err != nil {
+				fmt.Println("Error querying map. Error: ", err)
 			} else {
-				for _, player := range players.Players {
-					if str.Index(player.Name, "!replay") == -1 &&
-						str.Index(player.Name, "WR") == -1 &&
-						str.Index(player.Name, "Main") == -1 &&
-						str.Index(player.Name, "Bonus") == -1 &&
-						str.Index(player.Name, "GOTV") == -1 {
-						realPlayers = append(realPlayers, player.Name)
-					}
-				}
-				if len(realPlayers) > 0 {
-					op += fmt.Sprintf("%s**%s**\n", srv.Name[i], str.Join(realPlayers, ", "))
-				}
+				cm = append(cm, maaps.Map)
+			}
+			if len(cm) > 0 {
+				op += fmt.Sprintf("%s**%s**\n", srv.Name[i], str.Join(cm, "."))
 			}
 		}
 	}
 
-	//Create embed
+	//Edit embed
 	ed := &dG.MessageEmbed{
-		Title:       "Current players online.",
+		Title:       "Current maps.",
 		Description: op,
 		Footer: &dG.MessageEmbedFooter{
 			Text:    fmt.Sprintf("Took %.2fs to query servers!", time.Since(ts).Seconds()),
