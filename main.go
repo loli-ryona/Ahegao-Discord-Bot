@@ -2,54 +2,28 @@ package main
 
 import (
 	"Ahegao_Discord_Bot/cmds" //imagine a world where i could "./cmds" instead
-	"Ahegao_Discord_Bot/framework"
-	"encoding/json"
+	fwk "Ahegao_Discord_Bot/framework"
+	js "encoding/json"
 	"fmt"
 	"os"
 	"os/signal"
-	_ "strings"
 	"syscall"
 	"time"
 
 	ap "github.com/MikeModder/anpan"
-	"github.com/bwmarrin/discordgo"
+	dG "github.com/bwmarrin/discordgo"
 )
 
-//Channels and bhop server vars
-type statusbarServer struct {
-	name string
-	addr string
-	id   string
-}
-
-var statusbarServers = []statusbarServer{
-	{"🍺 Pub: ", "144.48.37.114:27015", "883671130286739476"},
-	{"🤍 WL: ", "144.48.37.118:27015", "883671190521147412"},
-	{"🦘 Kanga: ", "146.185.214.33:27015", "883671212784488498"},
-}
-
-//Regularly updates servers in status bar/channel list
-func ready(s *discordgo.Session, event *discordgo.Ready) {
-	go func() {
-		ticker := time.NewTicker(time.Second * 60)
-		for ; true; <-ticker.C {
-			for _, statusbarServer := range statusbarServers {
-				process(s, statusbarServer.name, statusbarServer.addr, statusbarServer.id)
-			}
-		}
-	}()
-}
-
-//Actual program shit now
 var (
-	cfg framework.Config
+	cfg        fwk.Config
+	srv        fwk.Servers
+	statBarSrv fwk.StatusBarServers
 )
 
 func onError(ctx ap.Context, cmd *ap.Command, context []string, err error) {
 	if err == ap.ErrCommandNotFound {
 		return
 	}
-
 	fmt.Printf("An error occurred for command \"%s\": \"%s\".\n", cmd.Name, err.Error())
 }
 
@@ -60,59 +34,84 @@ func cmdPrerun(ctx ap.Context, cmd *ap.Command, content []string) bool {
 
 func init() {
 	//Load config
-	bV, err := os.Open("config.json")
+	config, err := os.Open("config.json")
 	if err != nil {
 		fmt.Println("Error loading config. Error: ", err)
+		os.Exit(1)
 	}
 
-	err = json.NewDecoder(bV).Decode(&cfg)
-	if err != nil {
+	if err = js.NewDecoder(config).Decode(&cfg); err != nil {
 		fmt.Println("Error decoding config. Error: ", err)
 		os.Exit(1)
 	}
+
+	//Load status bar servers
+	sbs, err := os.Open("statusbar.json")
+	if err != nil {
+		fmt.Println("Error loading status bar servers. Error: ", err)
+		os.Exit(1)
+	}
+
+	if err = js.NewDecoder(sbs).Decode(&statBarSrv); err != nil {
+		fmt.Println("Error decoding status bar servers. Error: ", err)
+		os.Exit(1)
+	}
 }
+
+//Regularly updates servers in status bar/channel list
+func ready(s *dG.Session, event *dG.Ready) {
+	go func() {
+		ticker := time.NewTicker(time.Second * 60)
+		for ; true; <-ticker.C {
+			for i := 0; i < len(statBarSrv.Name); i++ {
+				process(s, statBarSrv.Name[i], statBarSrv.Addr[i], statBarSrv.Id[i])
+			}
+		}
+	}()
+}
+
 func main() {
-	discord, err := discordgo.New("Bot " + cfg.AuthID)
+	d, err := dG.New("Bot " + cfg.AuthID)
 	if err != nil {
 		fmt.Println("Error creating Discord session: ", err)
 		return
 	}
 
 	//Anpan command handler
-	handler := ap.New(cfg.Prefixes, []string{"Lost#5712", "251959155382812673"}, discord.StateEnabled, true, true, true, cmdPrerun, onError, nil)
-	discord.AddHandler(handler.MessageHandler)
+	h := ap.New(cfg.Prefixes, cfg.Owner, d.StateEnabled, cfg.IgnoreBots, cfg.RespondToPings, cfg.CheckPermissions, cmdPrerun, onError, nil)
+	d.AddHandler(h.MessageHandler)
 
 	//Command registers
-	handler.AddCommand("ping", "Check the bot's ping.", []string{"pong"}, false, false, discordgo.PermissionSendMessages, discordgo.PermissionSendMessages, ap.CommandTypeEverywhere, pingCommand)
-	handler.AddCommand("players", "Lists players on Bhop Servers", []string{}, false, false, discordgo.PermissionSendMessages, discordgo.PermissionSendMessages, ap.CommandTypeEverywhere, cmds.PlayersCommand)
-	handler.AddCommand("about", "Shows bot information", []string{}, false, false, discordgo.PermissionSendMessages, discordgo.PermissionSendMessages, ap.CommandTypeEverywhere, cmds.AboutCommand)
-	handler.AddCommand("urban", "Search a word on urban dictionairy", []string{"ud"}, false, false, discordgo.PermissionSendMessages, discordgo.PermissionSendMessages, ap.CommandTypeEverywhere, cmds.UrbanCommand)
+	h.AddCommand("ping", "Check the bot's ping.", []string{"pong"}, false, false, dG.PermissionSendMessages, dG.PermissionSendMessages, ap.CommandTypeEverywhere, pingCommand)
+	h.AddCommand("players", "Lists players on Bhop Servers", []string{}, false, false, dG.PermissionSendMessages, dG.PermissionSendMessages, ap.CommandTypeEverywhere, cmds.PlayersCommand)
+	h.AddCommand("about", "Shows bot information", []string{}, false, false, dG.PermissionSendMessages, dG.PermissionSendMessages, ap.CommandTypeEverywhere, cmds.AboutCommand)
+	h.AddCommand("urban", "Search a word on urban dictionary", []string{"ud"}, false, false, dG.PermissionSendMessages, dG.PermissionSendMessages, ap.CommandTypeEverywhere, cmds.UrbanCommand)
 
 	//Help command
-	handler.SetHelpCommand("help", []string{}, discordgo.PermissionSendMessages, discordgo.PermissionSendMessages, cmds.HelpCommand)
+	h.SetHelpCommand("help", []string{}, dG.PermissionSendMessages, dG.PermissionSendMessages, cmds.HelpCommand)
 
 	//Needed for status bar updates to work
-	discord.AddHandler(ready)
+	d.AddHandler(ready)
 
 	//Open session
-	err = discord.Open()
+	err = d.Open()
 	if err != nil {
 		fmt.Println("Error opening Discord session: ", err)
 		return
 	}
 	ap.WaitForInterrupt()
+	d.Close()
 
 	//Close on os interrupt
 	sc := make(chan os.Signal, 1)
 	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt, os.Kill)
 	<-sc
-	discord.Close()
 }
 
 //Debug ping command
 func pingCommand(ctx ap.Context, _ []string) error {
 	// We need to know what time it is now.
-	timestamp := time.Now()
+	ts := time.Now()
 
 	msg, err := ctx.Reply("Pong!")
 	if err != nil {
@@ -120,6 +119,6 @@ func pingCommand(ctx ap.Context, _ []string) error {
 	}
 
 	// Now we can compare it to the current time to see how much time went away during the process of sending a message.
-	_, err = ctx.Session.ChannelMessageEdit(ctx.Message.ChannelID, msg.ID, fmt.Sprintf("Pong! Ping took **%dms**!", time.Since(timestamp).Milliseconds()))
+	_, err = ctx.Session.ChannelMessageEdit(ctx.Message.ChannelID, msg.ID, fmt.Sprintf("Pong! Ping took **%dms**!", time.Since(ts).Milliseconds()))
 	return err
 }

@@ -1,67 +1,72 @@
 package cmds
 
 import (
+	fwk "Ahegao_Discord_Bot/framework"
+	js "encoding/json"
 	"fmt"
-	"github.com/MikeModder/anpan"
-	"github.com/bwmarrin/discordgo"
+	ap "github.com/MikeModder/anpan"
+	dG "github.com/bwmarrin/discordgo"
 	"github.com/rumblefrog/go-a2s"
-	"strings"
+	"os"
+	str "strings"
 )
 
-type server struct {
-	name string
-	addr string
-}
+var (
+	srv fwk.Servers
+)
 
-var servers = []server{
-	{"🍺 Pub: ", "144.48.37.114:27015"},
-	{"🤍 WL: ", "144.48.37.118:27015"},
-	{"🛹 Trikz: ", "144.48.37.119:27015"},
-	{"🦘 Kanga: ", "146.185.214.33:27015"},
-	{"🌌 Solitude: ", "51.161.131.99:27015"},
-	{"🚸 IMK Easy: ", "139.99.209.158:27016"},
-	{"🚸 IMK Hard: ", "139.99.209.158:27017"},
-	{"🏳️‍🌈 Gay Tradies: ", "203.28.238.134:27015"},
-	{"☭ Luchshe Veteranov: ", "46.174.52.164:27015"},
-}
-
-func PlayersCommand(ctx anpan.Context, _ []string) error {
+func PlayersCommand(ctx ap.Context, _ []string) error {
+	//Declaring output var
 	op := ""
-	for _, server := range servers {
-		client, err := a2s.NewClient(server.addr)
+
+	//Load servers.json
+	servers, err := os.Open("servers.json")
+	if err != nil {
+		fmt.Println("Error loading servers. Error: ", err)
+		os.Exit(1)
+	}
+
+	if err = js.NewDecoder(servers).Decode(&srv); err != nil {
+		fmt.Println("Error decoding servers. Error: ", err)
+		os.Exit(1)
+	}
+
+	//Loop through each server and get players
+	for i := 0; i < len(srv.Name); i++ {
 		var realPlayers []string
-		if err != nil {
-			//kill yourself
+		if client, err := a2s.NewClient(srv.Addr[i]); err != nil {
+			fmt.Println("Error creating new A2S client. Error: ", err)
 		} else {
 			defer client.Close()
-			players, err := client.QueryPlayer()
-			if err != nil {
-				//dont care
+			if players, err := client.QueryPlayer(); err != nil {
+				fmt.Println("Error querying players. Error: ", err)
 			} else {
 				for _, player := range players.Players {
-					if strings.Index(player.Name, "!replay") == -1 &&
-						strings.Index(player.Name, "WR") == -1 &&
-						strings.Index(player.Name, "Main") == -1 &&
-						strings.Index(player.Name, "Bonus") == -1 &&
-						strings.Index(player.Name, "GOTV") == -1 {
+					if str.Index(player.Name, "!replay") == -1 &&
+						str.Index(player.Name, "WR") == -1 &&
+						str.Index(player.Name, "Main") == -1 &&
+						str.Index(player.Name, "Bonus") == -1 &&
+						str.Index(player.Name, "GOTV") == -1 {
 						realPlayers = append(realPlayers, player.Name)
 					}
 				}
 				if len(realPlayers) > 0 {
-					op += fmt.Sprintf("%s**%s**\n", server.name, strings.Join(realPlayers, ", "))
+					op += fmt.Sprintf("%s**%s**\n", srv.Name[i], str.Join(realPlayers, ", "))
 				}
 			}
 		}
 	}
 
-	embed := &discordgo.MessageEmbed{
-		Title: "Current players online.",
+	//Create embed
+	embed := &dG.MessageEmbed{
+		Title:       "Current players online.",
 		Description: op,
-		Footer: &discordgo.MessageEmbedFooter{
+		Footer: &dG.MessageEmbedFooter{
 			IconURL: ctx.Session.State.User.AvatarURL("512"),
 		},
 	}
 
+	//Return embed
 	ctx.ReplyEmbed(embed)
 	return nil
 }

@@ -1,0 +1,15 @@
+{
+  "authid": "discord bot token",
+  "prefixes": [
+    "!",
+    "/"
+  ],
+  "owner": [
+    "username",
+    "userid"
+  ],
+
+  "ignorebots": true,
+  "respondtobots": true,
+  "checkpermissions": true
+}
