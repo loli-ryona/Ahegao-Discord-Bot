@@ -6,7 +6,7 @@ This bot is roughly based off **[Anpan](https://github.com/MikeModder/anpan/)** 
 
 ## Usage
 Check the `example` directory for an example of the .json config files. <br>
-These config files go in `1.` by default. <br>
+These config files go in `./` by default. <br>
 To run `cd` to `./` and execute `go run .`.
 
 ## Commands
