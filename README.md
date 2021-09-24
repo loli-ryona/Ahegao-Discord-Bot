@@ -15,5 +15,5 @@ By default prefixes are `_` and `.`<br>
 `_about` - Displays informations about the bot. <br>
 `_players` - Displays players on servers provided in `servers.json`. <br>
 `_currentmap` - Displays current map on servers provided in `servers.json`. <br>
-`_serverinfo <url.com/ip/ip:port` - Displays information about provided server. Only works on source games. <br>
+`_serverinfo <url.com/ip/ip:port>` - Displays information about provided server. Only works on source games. <br>
 `_urban <word>` - Searches Urban Dictioniary for provided word.
