@@ -46,6 +46,7 @@ func PlayersCommand(ctx ap.Context, _ []string) error {
 	}
 
 	//Loop through each server and get players
+	// TODO: Turn each server query into a Go Routine
 	for i := 0; i < len(srv.Name); i++ {
 		var realPlayers []string
 		if client, err := a2s.NewClient(srv.Addr[i]); err != nil {
