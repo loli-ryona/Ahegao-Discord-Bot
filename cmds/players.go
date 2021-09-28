@@ -34,7 +34,7 @@ func PlayersCommand(ctx ap.Context, _ []string) error {
 	}
 
 	//Load servers.json
-	servers, err := os.Open("servers.json")
+	servers, err := os.Open("cfgs/servers.json")
 	if err != nil {
 		fmt.Println("Error loading servers. Error: ", err)
 		os.Exit(1)

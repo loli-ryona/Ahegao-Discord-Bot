@@ -22,3 +22,8 @@ type StatusBarServers struct {
 	Addr []string `json:"addr"`
 	Id   []string `json:"id"`
 }
+
+type LennyExpressions struct {
+	Expression []string `json:"expression"`
+	Face       []string `json:"face"`
+}

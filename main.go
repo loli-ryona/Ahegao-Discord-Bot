@@ -34,7 +34,7 @@ func cmdPrerun(ctx ap.Context, cmd *ap.Command, content []string) bool {
 
 func init() {
 	//Load config
-	config, err := os.Open("config.json")
+	config, err := os.Open("cfgs/config.json")
 	if err != nil {
 		fmt.Println("Error loading config. Error: ", err)
 		os.Exit(1)
@@ -46,7 +46,7 @@ func init() {
 	}
 
 	//Load status bar servers
-	sbs, err := os.Open("statusbar.json")
+	sbs, err := os.Open("cfgs/statusbar.json")
 	if err != nil {
 		fmt.Println("Error loading status bar servers. Error: ", err)
 		os.Exit(1)
@@ -83,11 +83,12 @@ func main() {
 
 	//Command registers
 	h.AddCommand("ping", "Check the bot's ping.", []string{"pong"}, false, false, dG.PermissionSendMessages, dG.PermissionSendMessages, ap.CommandTypeEverywhere, pingCommand)
-	h.AddCommand("players", "Lists players on Bhop Servers", []string{}, false, false, dG.PermissionSendMessages, dG.PermissionSendMessages, ap.CommandTypeEverywhere, cmds.PlayersCommand)
-	h.AddCommand("about", "Shows bot information", []string{}, false, false, dG.PermissionSendMessages, dG.PermissionSendMessages, ap.CommandTypeEverywhere, cmds.AboutCommand)
+	h.AddCommand("players", "Lists players on Bhop Servers", []string{"on"}, false, false, dG.PermissionSendMessages, dG.PermissionSendMessages, ap.CommandTypeEverywhere, cmds.PlayersCommand)
+	h.AddCommand("about", "Shows bot information", []string{"bot"}, false, false, dG.PermissionSendMessages, dG.PermissionSendMessages, ap.CommandTypeEverywhere, cmds.AboutCommand)
 	h.AddCommand("urban", "Search a word on urban dictionary", []string{"ud"}, false, false, dG.PermissionSendMessages, dG.PermissionSendMessages, ap.CommandTypeEverywhere, cmds.UrbanCommand)
 	h.AddCommand("currentmap", "List current maps on Bhop Servers", []string{"cm"}, false, false, dG.PermissionSendMessages, dG.PermissionSendMessages, ap.CommandTypeEverywhere, cmds.CurrentMapCommand)
 	h.AddCommand("serverinfo", "Shows information of a server. _serverinfo 127.0.0.1:27015", []string{"si"}, false, false, dG.PermissionSendMessages, dG.PermissionSendMessages, ap.CommandTypeEverywhere, cmds.ServerInfoCommand)
+	h.AddCommand("lenny", "Replies with the specified lenny.", []string{}, false, false, dG.PermissionSendMessages, dG.PermissionSendMessages, ap.CommandTypeEverywhere, cmds.LennyCommand)
 
 	//Help command
 	h.SetHelpCommand("help", []string{}, dG.PermissionSendMessages, dG.PermissionSendMessages, cmds.HelpCommand)

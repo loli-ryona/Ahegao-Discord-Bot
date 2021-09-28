@@ -10,6 +10,38 @@ import (
 	"time"
 )
 
+func queryPlayers(addr string) (string, bool) {
+	onlinePlayers := ""
+	embedOnlinePlayers := false
+	client, errClient := a2s.NewClient(addr)
+	if errClient != nil {
+		onlinePlayers = fmt.Sprintln("Error creating client. Error: ", errClient)
+		return onlinePlayers, false
+	}
+
+	players, errPlayer := client.QueryPlayer()
+	if errPlayer != nil {
+		onlinePlayers = fmt.Sprintln("Error querying players. Error: ", errPlayer)
+		return onlinePlayers, false
+	}
+
+	var realPlayers []string
+	for _, player := range players.Players {
+		if str.Index(player.Name, "!replay") == -1 &&
+			str.Index(player.Name, "WR") == -1 &&
+			str.Index(player.Name, "Main") == -1 &&
+			str.Index(player.Name, "Bonus") == -1 &&
+			str.Index(player.Name, "GOTV") == -1 {
+			realPlayers = append(realPlayers, player.Name)
+		}
+	}
+	if len(realPlayers) > 0 {
+		embedOnlinePlayers = true
+	}
+	onlinePlayers += fmt.Sprintf("%s\n", str.Join(realPlayers, ", "))
+	return onlinePlayers, embedOnlinePlayers
+}
+
 func ServerInfoCommand(ctx ap.Context, args []string) error {
 	// thetime
 	ts := time.Now()
@@ -33,18 +65,6 @@ func ServerInfoCommand(ctx ap.Context, args []string) error {
 	if len(args) >= 1 {
 		//Get server from command
 		server := args[0]
-		var sName []string
-		var sMap []string
-		var sPlayers []uint8
-		var sMaxPlayers []uint8
-		var sBots []uint8
-		var sVac []bool
-		var sOs []a2s.ServerOS
-		var sPass []bool
-		var sGame []string
-		var sGameID []uint16
-		var onlinePlayers string
-
 		if client, err := a2s.NewClient(server); err != nil {
 			fmt.Println("Error creating new A2S client. Error: ", err)
 			embedErr := &dG.MessageEmbed{
@@ -61,25 +81,7 @@ func ServerInfoCommand(ctx ap.Context, args []string) error {
 			defer client.Close()
 
 			//Query server for player names
-			// TODO: Maybe make a seperate function just for
-			// TODO: player queries and server queries?
-			if players, err := client.QueryPlayer(); err != nil {
-				onlinePlayers = fmt.Sprintln("Error querying players. Error: ", err)
-			} else {
-				var realPlayers []string
-				for _, player := range players.Players {
-					if str.Index(player.Name, "!replay") == -1 &&
-						str.Index(player.Name, "WR") == -1 &&
-						str.Index(player.Name, "Main") == -1 &&
-						str.Index(player.Name, "Bonus") == -1 &&
-						str.Index(player.Name, "GOTV") == -1 {
-						realPlayers = append(realPlayers, player.Name)
-					}
-				}
-				if len(realPlayers) > 0 {
-					onlinePlayers += fmt.Sprintf("%s\n", str.Join(realPlayers, ", "))
-				}
-			}
+			onlinePlayers, hasPlayers := queryPlayers(server)
 
 			//Query server for info
 			if info, err := client.QueryInfo(); err != nil {
@@ -96,39 +98,24 @@ func ServerInfoCommand(ctx ap.Context, args []string) error {
 				return nil
 			} else {
 				//Assign vars
-				sName := append(sName, info.Name)
-				sMap := append(sMap, info.Map)
-				sPlayers := append(sPlayers, info.Players)
-				sMaxPlayers := append(sMaxPlayers, info.MaxPlayers)
-				sBots := append(sBots, info.Bots)
-				sVac := append(sVac, info.VAC)
-				sOs := append(sOs, info.ServerOS)
-				sPass := append(sPass, info.Visibility)
-				sGame := append(sGame, info.Game)
-				sGameID := append(sGameID, info.ID)
+				sPlayers := info.Players - info.Bots
+				sOs := info.ServerOS
 				srvOs := ""
-				srvBots := ""
 
-				if sOs[0] == a2s.ServerOS_Mac {
+				if sOs == a2s.ServerOS_Mac {
 					srvOs = "Mac OSX"
-				} else if sOs[0] == a2s.ServerOS_Linux {
+				} else if sOs == a2s.ServerOS_Linux {
 					srvOs = "Linux"
-				} else if sOs[0] == a2s.ServerOS_Windows {
+				} else if sOs == a2s.ServerOS_Windows {
 					srvOs = "Windows"
 				} else {
 					srvOs = "Unknown OS"
 				}
 
-				if sBots[0] > 0 {
-					srvBots = strconv.Itoa(int(sBots[0]))
-				} else {
-					srvBots = ""
-				}
-
 				//Edit embed
 				ed := &dG.MessageEmbed{
-					Title:       sName[0],
-					Description: "Currently **" + strconv.Itoa(int(sPlayers[0])) + "** players and **" + srvBots + "** bots out of **" + strconv.Itoa(int(sMaxPlayers[0])) + "** Total online.",
+					Title:       info.Name,
+					Description: "Currently **" + strconv.Itoa(int(sPlayers)) + "** players and **" + strconv.Itoa(int(info.Bots)) + "** bots out of **" + strconv.Itoa(int(info.MaxPlayers)) + "** Total online.",
 					Footer: &dG.MessageEmbedFooter{
 						Text:    fmt.Sprintf("Took %.2fs to query server!", time.Since(ts).Seconds()),
 						IconURL: ctx.Session.State.User.AvatarURL("512"),
@@ -136,24 +123,26 @@ func ServerInfoCommand(ctx ap.Context, args []string) error {
 				}
 
 				//Fields
-				ed.Fields = append(ed.Fields, &dG.MessageEmbedField{
-					Name:  "Current players:",
-					Value: onlinePlayers,
-				})
+				if hasPlayers == true {
+					ed.Fields = append(ed.Fields, &dG.MessageEmbedField{
+						Name:  "Current players: ",
+						Value: onlinePlayers,
+					})
+				}
 
 				ed.Fields = append(ed.Fields, &dG.MessageEmbedField{
 					Name:  "Current map:",
-					Value: sMap[0],
+					Value: info.Map,
 				})
 
 				ed.Fields = append(ed.Fields, &dG.MessageEmbedField{
 					Name:  "Security:",
-					Value: "VAC: " + strconv.FormatBool(sVac[0]) + " | Password: " + strconv.FormatBool(sPass[0]),
+					Value: "VAC: " + strconv.FormatBool(info.VAC) + " | Password: " + strconv.FormatBool(info.Visibility),
 				})
 
 				ed.Fields = append(ed.Fields, &dG.MessageEmbedField{
 					Name:  "System Info",
-					Value: "OS: " + srvOs + " | Game: " + sGame[0] + " | Game ID: " + strconv.Itoa(int(sGameID[0])),
+					Value: "OS: " + srvOs + " | Game: " + info.Game + " | Game ID: " + strconv.Itoa(int(info.ID)),
 				})
 				//Return embed
 				_, err = ctx.Session.ChannelMessageEditEmbed(ctx.Message.ChannelID, msg.ID, ed)
