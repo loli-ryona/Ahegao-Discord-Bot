@@ -18,3 +18,7 @@ By default prefixes are `_` and `.`<br>
 `_serverinfo <url.com/ip/ip:port>` - Displays information about provided server. Only works on source games. <br>
 `_urban <word>` - Searches Urban Dictioniary for provided word. <br>
 `_lenny <expression>` - Returns lenny face matching expression
+
+## TODO
+Command for weather<br>
+Command for BOM Radar<br>
