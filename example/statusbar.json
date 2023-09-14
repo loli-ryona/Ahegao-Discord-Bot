@@ -14,5 +14,7 @@
     "this will only work with 3 channels maximum due to discord limitations",
     "create 3 voice/text channels, right click and copy channel id. Paste in these fields like bellow",
     "xxxxxxxxxxxxxxxxxx"
-  ]
+  ],
+
+  "guild": "the id of the discord server"
 }

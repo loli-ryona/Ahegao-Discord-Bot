@@ -1,15 +1,17 @@
 package cmds
 
 import (
-	fwk "Ahegao_Discord_Bot/framework"
+	fwk "ahegao/framework"
 	js "encoding/json"
 	"fmt"
-	ap "github.com/MikeModder/anpan"
-	dG "github.com/bwmarrin/discordgo"
-	"github.com/rumblefrog/go-a2s"
 	"os"
 	str "strings"
+	"sync"
 	"time"
+
+	ap "ahegao/handler"
+	dG "github.com/bwmarrin/discordgo"
+	"github.com/rumblefrog/go-a2s"
 )
 
 var (
@@ -39,7 +41,7 @@ func CurrentMapCommand(ctx ap.Context, _ []string) error {
 	}
 
 	//Load servers.json
-	servers, err := os.Open("servers.json")
+	servers, err := os.Open("cfgs/servers.json")
 	if err != nil {
 		fmt.Println("Error loading servers. Error: ", err)
 		os.Exit(1)
@@ -50,23 +52,34 @@ func CurrentMapCommand(ctx ap.Context, _ []string) error {
 		os.Exit(1)
 	}
 
+	//Wait group shit
+	var wg sync.WaitGroup
+	wg.Add(len(srv.Name))
+
 	//Loop through each server and get current map
 	for i := 0; i < len(srv.Name); i++ {
-		var cm []string
-		if client, err := a2s.NewClient(srv.Addr[i]); err != nil {
-			fmt.Println("Error creating new A2S client. Error: ", err)
-		} else {
-			defer client.Close()
-			if maaps, err := client.QueryInfo(); err != nil {
-				fmt.Println("Error querying map. Error: ", err)
+		cum := i
+		go func(cum int) {
+			defer wg.Done()
+			var cm []string
+			if client, err := a2s.NewClient(srv.Addr[cum]); err != nil {
+				fmt.Println("Error creating new A2S client. Error: ", err)
 			} else {
-				cm = append(cm, maaps.Map)
+				defer client.Close()
+				if maaps, err := client.QueryInfo(); err != nil {
+					fmt.Println("Error querying map. Error: ", err)
+				} else {
+					cm = append(cm, maaps.Map)
+				}
+				if len(cm) > 0 {
+					op += fmt.Sprintf("%s**%s**\n", srv.Name[cum], str.Join(cm, "."))
+				}
 			}
-			if len(cm) > 0 {
-				op += fmt.Sprintf("%s**%s**\n", srv.Name[i], str.Join(cm, "."))
-			}
-		}
+		}(cum)
 	}
+	wg.Wait()
+
+	fmt.Println("Waitgroup Done")
 
 	//Edit embed
 	ed := &dG.MessageEmbed{

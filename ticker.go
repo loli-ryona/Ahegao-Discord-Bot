@@ -2,14 +2,18 @@ package main
 
 import (
 	"fmt"
-
 	dG "github.com/bwmarrin/discordgo"
 	"github.com/davecgh/go-spew/spew"
 	"github.com/rumblefrog/go-a2s"
 )
 
-// tanami made this so :P
-func process(s *dG.Session, name string, addr string, id string) {
+/*Updates status bar channel information every 60 seconds
+ * session = *discordgo.Session
+ * name = server name
+ * addr = server domain
+ * id = channel id
+ */
+func process(session *dG.Session, name string, addr string, id string) {
 	go func() {
 		fmt.Println("working on " + name)
 		client, err := a2s.NewClient(addr)
@@ -29,7 +33,7 @@ func process(s *dG.Session, name string, addr string, id string) {
 
 				// todo: do not update same value to save rate limits
 
-				ch, err := s.ChannelEdit(id, status)
+				ch, err := session.ChannelEdit(id, &dG.ChannelEdit{Name: status})
 				if err != nil {
 					spew.Dump(ch)
 					fmt.Println(err)

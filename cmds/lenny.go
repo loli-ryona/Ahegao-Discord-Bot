@@ -1,22 +1,24 @@
 package cmds
 
 import (
-	fwk "Ahegao_Discord_Bot/framework"
+	fwk "ahegao/framework"
 	js "encoding/json"
 	"fmt"
-	ap "github.com/MikeModder/anpan"
-	dG "github.com/bwmarrin/discordgo"
 	"os"
 	str "strings"
+
+	ap "ahegao/handler"
+	dG "github.com/bwmarrin/discordgo"
 )
 
-var lenny = fwk.LennyExpressions{}
+var (
+	lenny fwk.LennyExpressions
+)
 
 func lennyFaces(args string) (string, bool) {
 	notFound := false
 	face := ""
 	for i := 0; i < len(lenny.Expression); i++ {
-		fmt.Println("")
 		if args == lenny.Expression[i] {
 			face = lenny.Face[i]
 		}

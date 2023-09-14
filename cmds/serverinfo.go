@@ -1,8 +1,8 @@
 package cmds
 
 import (
+	ap "ahegao/handler"
 	"fmt"
-	ap "github.com/MikeModder/anpan"
 	dG "github.com/bwmarrin/discordgo"
 	"github.com/rumblefrog/go-a2s"
 	"strconv"

@@ -1,9 +1,9 @@
 package cmds
 
 import (
+	ap "ahegao/handler"
 	"fmt"
 	ud "github.com/JoshuaDoes/urbandictionary"
-	ap "github.com/MikeModder/anpan"
 	dG "github.com/bwmarrin/discordgo"
 	"net/url"
 	"regexp"

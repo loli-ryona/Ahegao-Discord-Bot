@@ -5,7 +5,7 @@ import (
 	"sort"
 	"strings"
 
-	ap "github.com/MikeModder/anpan"
+	ap "ahegao/handler"
 	dG "github.com/bwmarrin/discordgo"
 )
 

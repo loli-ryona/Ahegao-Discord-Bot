@@ -1,13 +1,16 @@
 {
   "authid": "discord bot token",
   "prefixes": [
-    "!",
-    "/"
+    "_",
+    "."
   ],
+
   "owner": [
     "username",
     "userid"
   ],
+
+  "openweatherapi": "a6f4c360e288502b591c2f490a8de2b1",
 
   "ignorebots": true,
   "respondtobots": true,

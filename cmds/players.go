@@ -1,17 +1,19 @@
 package cmds
 
 import (
+	hnd "ahegao/handler"
 	js "encoding/json"
 	"fmt"
-	ap "github.com/MikeModder/anpan"
-	dG "github.com/bwmarrin/discordgo"
-	"github.com/rumblefrog/go-a2s"
 	"os"
 	str "strings"
+	"sync"
 	"time"
+
+	dG "github.com/bwmarrin/discordgo"
+	"github.com/rumblefrog/go-a2s"
 )
 
-func PlayersCommand(ctx ap.Context, _ []string) error {
+func PlayersCommand(ctx hnd.Context, _ []string) error {
 	// thetime
 	ts := time.Now()
 
@@ -45,32 +47,41 @@ func PlayersCommand(ctx ap.Context, _ []string) error {
 		os.Exit(1)
 	}
 
+	//Wait group shit
+	var wg sync.WaitGroup
+	wg.Add(len(srv.Name))
+
 	//Loop through each server and get players
-	// TODO: Turn each server query into a Go Routine
 	for i := 0; i < len(srv.Name); i++ {
-		var realPlayers []string
-		if client, err := a2s.NewClient(srv.Addr[i]); err != nil {
-			fmt.Println("Error creating new A2S client. Error: ", err)
-		} else {
-			defer client.Close()
-			if players, err := client.QueryPlayer(); err != nil {
-				fmt.Println("Error querying players. Error: ", err)
+		cum := i
+		go func(cum int) {
+			defer wg.Done()
+			var realPlayers []string
+			if client, err := a2s.NewClient(srv.Addr[cum]); err != nil {
+				fmt.Println("Error creating new A2S client. Error: ", err)
 			} else {
-				for _, player := range players.Players {
-					if str.Index(player.Name, "!replay") == -1 &&
-						str.Index(player.Name, "WR") == -1 &&
-						str.Index(player.Name, "Main") == -1 &&
-						str.Index(player.Name, "Bonus") == -1 &&
-						str.Index(player.Name, "GOTV") == -1 {
-						realPlayers = append(realPlayers, player.Name)
+				defer client.Close()
+				if players, err := client.QueryPlayer(); err != nil {
+					fmt.Println("Error querying players. Error: ", err)
+				} else {
+					for _, player := range players.Players {
+						if str.Index(player.Name, "!replay") == -1 &&
+							str.Index(player.Name, "WR") == -1 &&
+							str.Index(player.Name, "Main") == -1 &&
+							str.Index(player.Name, "Bonus") == -1 &&
+							str.Index(player.Name, "GOTV") == -1 {
+							realPlayers = append(realPlayers, player.Name)
+						}
+					}
+					if len(realPlayers) > 0 {
+						op += fmt.Sprintf("%s**%s**\n", srv.Name[cum], str.Join(realPlayers, ", "))
 					}
 				}
-				if len(realPlayers) > 0 {
-					op += fmt.Sprintf("%s**%s**\n", srv.Name[i], str.Join(realPlayers, ", "))
-				}
 			}
-		}
+		}(cum)
 	}
+
+	wg.Wait()
 
 	//Create embed
 	ed := &dG.MessageEmbed{

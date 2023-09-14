@@ -1,3 +1,6 @@
 cfgs/config.json
 cfgs/servers.json
 cfgs/statusbar.json
+cfgs/srcdspaths.json
+_debug_bin.exe
+.idea
