@@ -1,25 +1,19 @@
 package cmds
 
 import (
-	fwk "ahegao/framework"
-	"encoding/json"
+	ap "ahegao/handler"
 	"fmt"
+	dG "github.com/bwmarrin/discordgo"
+	"github.com/cavaliergopher/grab/v3"
 	"os"
 	"strings"
 	"time"
-
-	ap "ahegao/handler"
-	dG "github.com/bwmarrin/discordgo"
-
-	"github.com/cavaliergopher/grab/v3"
 )
 
-var (
-	srcds fwk.SrcdsPaths
-)
-
-// WIP FUNCTION
-// currently a bit of a mess.
+// DownloadMapCommand - WIP FUNCTION
+/*
+ NOTE: currently a bit of a mess and not implemented by default.
+*/
 func DownloadMapCommand(ctx ap.Context, args []string) error {
 	// thetime
 	ts := time.Now()
@@ -40,18 +34,6 @@ func DownloadMapCommand(ctx ap.Context, args []string) error {
 	msg, err := ctx.ReplyEmbed(embed)
 	if err != nil {
 		return err
-	}
-
-	//Load srcds config
-	srcdsConf, err := os.Open("cfgs/srcdspaths.json")
-	if err != nil {
-		fmt.Println("Error loading srcds paths. Error: ", err)
-		os.Exit(1)
-	}
-
-	if err = json.NewDecoder(srcdsConf).Decode(&srcds); err != nil {
-		fmt.Println("Error decoding srcds paths. Error: ", err)
-		os.Exit(1)
 	}
 
 	if len(args) >= 1 {
@@ -139,8 +121,8 @@ func DownloadMapCommand(ctx ap.Context, args []string) error {
 			for {
 				select {
 				case <-t.C:
-					fmt.Printf("  Transferred %v bytes - ETA: %v\n", fwk.ByteString(resp.BytesComplete()), resp.ETA())
-					op = fmt.Sprintf("  Transferred %v bytes - ETA: %v\n", fwk.ByteString(resp.BytesComplete()), resp.ETA())
+					fmt.Printf("  Transferred %v bytes - ETA: %v\n", byteString(resp.BytesComplete()), resp.ETA())
+					op = fmt.Sprintf("  Transferred %v bytes - ETA: %v\n", byteString(resp.BytesComplete()), resp.ETA())
 					ed = &dG.MessageEmbed{
 						Title:       fmt.Sprintf("Downloading map: %s", bhopMap),
 						Description: op,
@@ -199,4 +181,24 @@ func DownloadMapCommand(ctx ap.Context, args []string) error {
 	}
 
 	return nil
+}
+
+// ByteString = Prints download progress.
+/*
+ * n = Bytes downloaded so far, accepts the response for BytesComplete as an int64
+ */
+func byteString(n int64) string {
+	if n < 1<<10 {
+		return fmt.Sprintf("%dB", n)
+	}
+	if n < 1<<20 {
+		return fmt.Sprintf("%dKB", n>>10)
+	}
+	if n < 1<<30 {
+		return fmt.Sprintf("%dMB", n>>20)
+	}
+	if n < 1<<40 {
+		return fmt.Sprintf("%dGB", n>>30)
+	}
+	return fmt.Sprintf("%dTB", n>>40)
 }

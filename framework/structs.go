@@ -1,6 +1,16 @@
 package framework
 
-/*Structure for ./cfgs/config.json to be loaded into.
+// Configs = Structure that contains all the individual configs
+type Configs struct {
+	MainConfig      Config
+	ServersConfig   Servers
+	StatusBarConfig StatusBarServers
+	LennyConfig     LennyExpressions
+	SrcdsConfig     SrcdsPaths
+}
+
+//Config = Structure for ./cfgs/config.json to be loaded into.
+/*
  * AuthID = bot token.
  * Prefixes = prefix needed to execute commands.
  * Owner = bot owner.
@@ -17,9 +27,11 @@ type Config struct {
 	RespondToPings   bool     `json:"respondtopings"`
 	CheckPermissions bool     `json:"checkpermissions"`
 	OpenWeatherAPI   string   `json:"openweatherapi"`
+	OpenAIAPI        string   `json:"openaiapi"`
 }
 
-/*Structure for ./cfgs/servers.json to be loaded into.
+//Servers = Structure for ./cfgs/servers.json to be loaded into.
+/*
  * Name = name of the server.
  * Addr = server domain.
  */
@@ -28,7 +40,8 @@ type Servers struct {
 	Addr []string `json:"addr"`
 }
 
-/*Structure for ./cfgs/statusbar.json to be loaded into.
+//StatusBarServers = Structure for ./cfgs/statusbar.json to be loaded into.
+/*
  * Name = name that is displayed on the status bar.
  * Addr = server domain.
  * Id = id of the channel to update.
@@ -39,7 +52,8 @@ type StatusBarServers struct {
 	Id   []string `json:"id"`
 }
 
-/*Structure for ./cfgs/lenny.json to be loaded into.
+//LennyExpressions = Structure for ./cfgs/lenny.json to be loaded into.
+/*
  * Expression = the name of the expression.
  * Face = the lenny associated with the expression.
  */
@@ -48,7 +62,8 @@ type LennyExpressions struct {
 	Face       []string `json:"face"`
 }
 
-/*Structure for ./cfgs/srcdspaths.json to be loaded into.
+//SrcdsPaths = Structure for ./cfgs/srcdspaths.json to be loaded into.
+/*
  * MapDir = directory to download source maps to.
  * FastDL = domain of the server hosting the maps.
 

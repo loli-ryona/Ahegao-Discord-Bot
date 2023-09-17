@@ -1,18 +1,11 @@
 package cmds
 
 import (
-	fwk "ahegao/framework"
-	js "encoding/json"
 	"fmt"
-	"os"
 	str "strings"
 
 	ap "ahegao/handler"
 	dG "github.com/bwmarrin/discordgo"
-)
-
-var (
-	lenny fwk.LennyExpressions
 )
 
 func lennyFaces(args string) (string, bool) {
@@ -47,17 +40,6 @@ func listLennyFaces() (string, string) {
 }
 
 func LennyCommand(ctx ap.Context, args []string) error {
-	faces, err := os.Open("cfgs/lenny.json")
-	if err != nil {
-		fmt.Println("Error loading lenny faces. Error: ", err)
-		os.Exit(1)
-	}
-
-	if err = js.NewDecoder(faces).Decode(&lenny); err != nil {
-		fmt.Println("Error decoding lenny faces. Error: ", err)
-		os.Exit(1)
-	}
-
 	if len(args) >= 1 {
 		if face, notFound := lennyFaces(args[0]); notFound == true {
 			fmt.Println("Provided expression not found")

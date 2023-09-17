@@ -6,17 +6,10 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
-	"os"
 	"time"
-
-	fwk "ahegao/framework"
 
 	ap "ahegao/handler"
 	dG "github.com/bwmarrin/discordgo"
-)
-
-var (
-	cfg fwk.Config
 )
 
 type ApiResp struct {
@@ -80,18 +73,6 @@ func WeatherCommand(ctx ap.Context, args []string) error {
 	msg, err := ctx.ReplyEmbed(embed)
 	if err != nil {
 		return err
-	}
-
-	//Load config
-	config, err := os.Open("cfgs/config.json")
-	if err != nil {
-		fmt.Println("Error loading config. Error: ", err)
-		os.Exit(1)
-	}
-
-	if err = js.NewDecoder(config).Decode(&cfg); err != nil {
-		fmt.Println("Error decoding config. Error: ", err)
-		os.Exit(1)
 	}
 
 	if len(args) >= 1 {

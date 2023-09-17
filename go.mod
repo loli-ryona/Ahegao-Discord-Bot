@@ -1,6 +1,6 @@
 module ahegao
 
-go 1.17
+go 1.21.1
 
 require (
 	github.com/JoshuaDoes/urbandictionary v0.0.0-20180802142829-e5f649d88711
@@ -12,6 +12,7 @@ require (
 
 require (
 	github.com/gorilla/websocket v1.5.0 // indirect
+	github.com/sashabaranov/go-openai v1.15.3 // indirect
 	golang.org/x/crypto v0.13.0 // indirect
 	golang.org/x/sys v0.12.0 // indirect
 )

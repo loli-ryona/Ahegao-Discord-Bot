@@ -1,10 +1,7 @@
 package cmds
 
 import (
-	fwk "ahegao/framework"
-	js "encoding/json"
 	"fmt"
-	"os"
 	str "strings"
 	"sync"
 	"time"
@@ -12,10 +9,6 @@ import (
 	ap "ahegao/handler"
 	dG "github.com/bwmarrin/discordgo"
 	"github.com/rumblefrog/go-a2s"
-)
-
-var (
-	srv fwk.Servers
 )
 
 func CurrentMapCommand(ctx ap.Context, _ []string) error {
@@ -38,18 +31,6 @@ func CurrentMapCommand(ctx ap.Context, _ []string) error {
 	msg, err := ctx.ReplyEmbed(embed)
 	if err != nil {
 		return err
-	}
-
-	//Load servers.json
-	servers, err := os.Open("cfgs/servers.json")
-	if err != nil {
-		fmt.Println("Error loading servers. Error: ", err)
-		os.Exit(1)
-	}
-
-	if err = js.NewDecoder(servers).Decode(&srv); err != nil {
-		fmt.Println("Error decoding servers. Error: ", err)
-		os.Exit(1)
 	}
 
 	//Wait group shit

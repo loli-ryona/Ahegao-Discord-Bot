@@ -16,7 +16,7 @@ func AboutCommand(ctx ap.Context, _ []string) error {
 			},
 			{
 				Name:  "Version",
-				Value: "Currently running on version 1.4a",
+				Value: "Currently running on version 1.4.1",
 			},
 			{
 				Name:  "Language",

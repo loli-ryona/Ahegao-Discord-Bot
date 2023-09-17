@@ -1,7 +1,7 @@
 package cmds
 
 import (
-	ap "ahegao/handler"
+	hnd "ahegao/handler"
 	"fmt"
 	ud "github.com/JoshuaDoes/urbandictionary"
 	dG "github.com/bwmarrin/discordgo"
@@ -11,7 +11,7 @@ import (
 	str "strings"
 )
 
-func UrbanCommand(ctx ap.Context, args []string) error {
+func UrbanCommand(ctx hnd.Context, args []string) error {
 	// if query fails return error
 	query, err := ud.Query(str.Join(args, " "))
 	if err != nil {

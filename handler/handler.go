@@ -131,19 +131,20 @@ func (c *CommandHandler) SetPrerunFunc(prf PrerunFunc) {
 	c.prerunFunc = prf
 }
 
-/*AddCommand adds a command to the Commands map.
- * name         - The name of the this command.
- * description  - The description for this command.
- * aliases      - Additional aliases used for this command.
- * owneronly    - Whether only owners can access this command or not.
- * hidden       - Whether a help command should hide this command or not.
- * selfperms    - The necessary permissions for this command. Set this to "0" if any level is fine.
- * userperms    - The necessary permissions for the user to meet to use this command. Set this to "0" if any level is fine.
- * cmdtype      - The appropriate command type for this command. Use this to limit commands to direct messages or guilds. Refer to CommandType for help.
- *function     - The command itself. Refer to CommandFunc for help.
+/*
+AddCommand adds a command to the Commands map.
+  - name         - The name of this command.
+  - description  - The description for this command.
+  - aliases      - Additional aliases used for this command.
+  - owneronly    - Whether only owners can access this command or not.
+  - hidden       - Whether a help command should hide this command or not.
+  - selfperms    - The necessary permissions for this command. Set this to "0" if any level is fine.
+  - userperms    - The necessary permissions for the user to meet to use this command. Set this to "0" if any level is fine.
+  - cmdtype      - The appropriate command type for this command. Use this to limit commands to direct messages or guilds. Refer to CommandType for help.
+    *function     - The command itself. Refer to CommandFunc for help.
 
 Errors:
- * ErrCommandAlreadyRegistered -> There's already a (help) command with this name.
+  - ErrCommandAlreadyRegistered -> There's already a (help) command with this name.
 */
 func (c *CommandHandler) AddCommand(name, desc string, aliases []string, owneronly, hidden bool, selfperms, userperms int64, cmdtype CommandType, run CommandFunc) error {
 	for _, v := range c.commands {
@@ -171,10 +172,11 @@ func (c *CommandHandler) AddCommand(name, desc string, aliases []string, owneron
 	return nil
 }
 
-/*RemoveCommand removes the supplied command from the command array by using its name.
+/*
+RemoveCommand removes the supplied command from the command array by using its name.
 
 Errors:
- * ErrCommandNotFound -> The given name doesn't belong to any command.
+  - ErrCommandNotFound -> The given name doesn't belong to any command.
 */
 func (c *CommandHandler) RemoveCommand(name string) error {
 
@@ -197,18 +199,19 @@ func (c *CommandHandler) GetHelpCommand() *HelpCommand {
 	return c.helpCommand
 }
 
-/*SetHelpCommand sets the help command.
- * name         - The name of the help command; this should be "help" under normal circumstances.
- * aliases      - Additional aliases used for the help command.
- * selfperms    - The necessary permissions for this help command. Set this to "0" if any level is fine.
- * userperms    - The necessary permissions for the user to meet to use this help command. Set this to "0" if any level is fine.
- * function     - The help command itself. Refer to HelpCommandFunc for help.
+/*
+SetHelpCommand sets the help command.
+  - name         - The name of the help command; this should be "help" under normal circumstances.
+  - aliases      - Additional aliases used for the help command.
+  - selfperms    - The necessary permissions for this help command. Set this to "0" if any level is fine.
+  - userperms    - The necessary permissions for the user to meet to use this help command. Set this to "0" if any level is fine.
+  - function     - The help command itself. Refer to HelpCommandFunc for help.
 
 Notes:
- * The command handler always checks for the help command first.
+  - The command handler always checks for the help command first.
 
 Errors:
- * ErrCommandAlreadyRegistered  -> There's already another command that has been registered with the same name.
+  - ErrCommandAlreadyRegistered  -> There's already another command that has been registered with the same name.
 */
 func (c *CommandHandler) SetHelpCommand(name string, aliases []string, selfperms, userperms int64, function HelpCommandFunc) error {
 	for _, v := range c.commands {
