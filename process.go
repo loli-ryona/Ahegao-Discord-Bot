@@ -55,7 +55,7 @@ func statusBarProcess(session *dG.Session, name string, addr string, id string) 
 				r34l := float64(info.Players - info.Bots)
 				status := fmt.Sprintf("%s%0.f", name, r34l)
 				fmt.Println(status)
-				
+
 				same, err := session.Channel(id)
 				if err != nil {
 					fmt.Println("Cannot get channel name")

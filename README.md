@@ -21,7 +21,8 @@ By default prefixes are `_` and `.`<br>
 `_urban <word>` - Searches Urban Dictioniary for provided word. <br>
 `_lenny <expression>` - Returns lenny face matching expression. <br>
 `_time` - Displays the time. <br>
-`_weather <city>,<state>,<country code> [-c/-f/-k]` - Displays the weather in given area <br> 
+`_weather <city>,<state>,<country code> [-c/-f/-k]` - Displays the weather in given area <br>
+`_dalle <prompt> [--size=256/512/1024]` - Generates an image based on the given prompt, can optionally specify a size.
 
 ## TODO
 ~~Command for weather<br>~~
